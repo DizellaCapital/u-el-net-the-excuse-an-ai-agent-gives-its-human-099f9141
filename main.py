@@ -24,6 +24,8 @@ def main():
         return fail("entry must be a single line")
     if "\t" in text:
         return fail("entry must not contain tabs")
+    if "\x00" in text or any(ord(ch) < 32 for ch in text):
+        return fail("entry must not contain control characters")
     if text != text.strip():
         return fail("entry must not have leading or trailing whitespace")
     if not text.strip():
