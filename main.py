@@ -16,20 +16,28 @@ def fail(message):
     return 1
 
 
+def validate_entry(text):
+    """Return an error message if the entry breaks the gate, else None."""
+    if len(text) < 1 or len(text) > 200:
+        return "entry must be 1-200 characters, got %d" % len(text)
+    if "\n" in text or "\r" in text:
+        return "entry must be a single line"
+    if "\t" in text:
+        return "entry must not contain tabs"
+    if "\x00" in text or any(ord(ch) < 32 for ch in text):
+        return "entry must not contain control characters"
+    if text != text.strip():
+        return "entry must not have leading or trailing whitespace"
+    if not text.strip():
+        return "entry must not be only whitespace"
+    return None
+
+
 def main():
     text = ENTRY
-    if len(text) < 1 or len(text) > 200:
-        return fail("entry must be 1-200 characters, got %d" % len(text))
-    if "\n" in text or "\r" in text:
-        return fail("entry must be a single line")
-    if "\t" in text:
-        return fail("entry must not contain tabs")
-    if "\x00" in text or any(ord(ch) < 32 for ch in text):
-        return fail("entry must not contain control characters")
-    if text != text.strip():
-        return fail("entry must not have leading or trailing whitespace")
-    if not text.strip():
-        return fail("entry must not be only whitespace")
+    problem = validate_entry(text)
+    if problem is not None:
+        return fail(problem)
     target_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
     os.makedirs(target_dir, exist_ok=True)
     target = os.path.join(target_dir, "entry.txt")
